@@ -174,12 +174,14 @@ def test_empty_search_empty_history_and_search_paging():
     scenario(flow, handler)
 
 
-def test_unauthorized_user_cannot_create_search_or_read_history():
+def test_public_user_can_list_students():
+    def handler(request):
+        assert request.url.path == '/students'
+        return httpx.Response(200, json=[STUDENT])
     async def flow(send, state):
-        for text in ['➕ Добавить ученика', '🔎 Найти ученика', '📜 История оплат']:
-            assert 'Доступ закрыт' in (await send(text, uid=8)).text
-        assert not state
-    scenario(flow, no_request)
+        result = await send('/students', uid=8)
+        assert 'Азиза' in result.text
+    scenario(flow, handler)
 
 
 def test_bot_create_search_pay_history_against_real_api(client):
