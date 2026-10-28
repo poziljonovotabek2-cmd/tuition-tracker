@@ -41,23 +41,33 @@ protected = [Depends(authorize)]
 # entries so subsequent reads always reflect committed database state.
 _read_cache: dict[tuple, tuple[float, object]] = {}
 _cache_lock = RLock()
+_cache_generation = 0
 _CACHE_TTL_SECONDS = 30
+_CACHE_MAX_ENTRIES = 512
 
 
 def cached(key, factory):
     now = time.monotonic()
     with _cache_lock:
+        generation = _cache_generation
         entry = _read_cache.get(key)
         if entry and entry[0] > now:
             return entry[1]
     value = factory()
     with _cache_lock:
-        _read_cache[key] = (now + _CACHE_TTL_SECONDS, value)
+        if generation == _cache_generation:
+            for expired in [item for item, record in _read_cache.items() if record[0] <= now]:
+                _read_cache.pop(expired, None)
+            if len(_read_cache) >= _CACHE_MAX_ENTRIES:
+                _read_cache.pop(next(iter(_read_cache)))
+            _read_cache[key] = (time.monotonic() + _CACHE_TTL_SECONDS, value)
     return value
 
 
 def invalidate_read_cache():
+    global _cache_generation
     with _cache_lock:
+        _cache_generation += 1
         _read_cache.clear()
 
 
