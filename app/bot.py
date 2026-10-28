@@ -206,8 +206,6 @@ async def _process_update(update, api, admins, timezone, bot_id, sessions=None):
         return Screen('Для работы с оплатами откройте личный чат с ботом.', [])
     if command == '/id':
         return Screen(f'Ваш Telegram ID: {user_id}', [back()] if user_id in admins else [])
-    if user_id not in admins:
-        return Screen('Доступ закрыт. Передайте администратору ваш ID через /id.', [])
     if callback:
         try:
             return await buttonHandler(callback.get('data', ''), user_id, api, timezone, bot_id, sessions)
@@ -328,9 +326,9 @@ async def deliver_screen(telegram, update, screen):
 
 async def run():
     settings = get_settings()
-    if not settings.bot_token or not settings.admin_telegram_ids.strip():
-        raise ValueError('Set BOT_TOKEN and ADMIN_TELEGRAM_IDS in .env')
-    admins = {int(value.strip()) for value in settings.admin_telegram_ids.split(',')}
+    if not settings.bot_token:
+        raise ValueError('Set BOT_TOKEN in .env')
+    admins = {int(value.strip()) for value in settings.admin_telegram_ids.split(',') if value.strip()}
     ZoneInfo(settings.timezone)
     sessions = {}
     keyboards = {}
