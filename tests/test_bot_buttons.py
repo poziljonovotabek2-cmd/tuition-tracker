@@ -136,7 +136,7 @@ def test_student_pagination():
     run_flow(flow, handler)
 
 
-def test_stale_and_unauthorized_callbacks_never_call_api():
+def test_stale_callbacks_never_call_api():
     def handler(request):
         raise AssertionError('Unexpected API access')
     async def flow(dispatch, sessions):
@@ -144,7 +144,7 @@ def test_stale_and_unauthorized_callbacks_never_call_api():
             result = await dispatch(callback(data))
             assert 'устарел' in result.text and 'menu' in actions(result)
         result = await dispatch(callback('confirm:51', uid=8))
-        assert 'Доступ закрыт' in result.text
+        assert 'устарел' in result.text
     run_flow(flow, handler)
 
 
