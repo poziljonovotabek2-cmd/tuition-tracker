@@ -18,6 +18,7 @@ PAGE_SIZE = 5
 class Screen:
     text: str
     buttons: list
+    placeholder: str = 'Выберите кнопку или введите сумму'
 
     @property
     def markup(self):
@@ -25,7 +26,7 @@ class Screen:
             return {'remove_keyboard': True}
         return {'keyboard': [[{'text': b['text']} for b in row] for row in self.buttons],
                 'resize_keyboard': True, 'is_persistent': True, 'one_time_keyboard': False,
-                'input_field_placeholder': 'Выберите кнопку или введите сумму'}
+                'input_field_placeholder': self.placeholder}
 
 
 def button(text, data):
@@ -41,8 +42,112 @@ def home():
         [button('💳 Внести оплату', 'pay:0')],
         [button('📋 Должники', 'debt:0'), button('👥 Ученики', 'students:0')],
         [button('➕ Добавить ученика', 'create'), button('🔎 Найти ученика', 'search')],
+        [button('🌐 Язык / Til', 'language')],
         [button('❓ Помощь', 'help')],
     ])
+
+
+UZ_TRANSLATIONS = {
+    'Главное меню\n\nВыберите действие:': 'Asosiy menyu\n\nAmalni tanlang:',
+    'Выберите действие:': 'Amalni tanlang:',
+    'Ученики': 'O‘quvchilar',
+    'Должники': 'Qarzdorlar',
+    '💳 Внести оплату': '💳 To‘lov qilish',
+    '📋 Должники': '📋 Qarzdorlar',
+    '👥 Ученики': '👥 O‘quvchilar',
+    '➕ Добавить ученика': '➕ O‘quvchi qo‘shish',
+    '🔎 Найти ученика': '🔎 O‘quvchini qidirish',
+    '❓ Помощь': '❓ Yordam',
+    '🌐 Язык / Til': '🌐 Til / Язык',
+    '⬅️ Назад': '⬅️ Orqaga',
+    '🏠 Главное меню': '🏠 Asosiy menyu',
+    'Как пользоваться': 'Foydalanish bo‘yicha qo‘llanma',
+    'Внести оплату: выберите ученика, введите сумму и подтвердите.': 'To‘lov qilish: o‘quvchini tanlang, summani kiriting va tasdiqlang.',
+    'Должники: долг за текущий месяц.': 'Qarzdorlar: joriy oy uchun qarzlar.',
+    'Ученики: карточки с историей оплат.': 'O‘quvchilar: to‘lovlar tarixi bilan kartalar.',
+    'Добавить ученика: заполните данные по шагам.': 'O‘quvchi qo‘shish: ma’lumotlarni bosqichma-bosqich kiriting.',
+    'Найти ученика: поиск по имени или телефону.': 'O‘quvchini qidirish: ism yoki telefon orqali qidiring.',
+    'Кнопка «Назад» возвращает на предыдущий шаг.': '«Orqaga» tugmasi oldingi bosqichga qaytaradi.',
+    'Вернуться в меню можно командой /start.': '/start buyrug‘i bilan menyuga qaytishingiz mumkin.',
+    'Выберите ученика для оплаты': 'To‘lov uchun o‘quvchini tanlang',
+    'Учеников пока нет. Нажмите «Добавить ученика» в главном меню.': 'Hozircha o‘quvchilar yo‘q. Asosiy menyuda «O‘quvchi qo‘shish» tugmasini bosing.',
+    '← Предыдущие': '← Oldingilar',
+    'Следующие →': 'Keyingilar →',
+    'страница': 'sahifa',
+    'Страница ': 'Sahifa ',
+    'Должники за': 'Qarzdorlar ·',
+    'За ': '',
+    ' должников нет.': ' uchun qarzdorlar yo‘q.',
+    'Общий долг:': 'Jami qarz:',
+    'Тел.:': 'Tel.:',
+    'Долг:': 'Qarz:',
+    'Группа:': 'Guruh:',
+    'Тариф:': 'Oylik to‘lov:',
+    'Внести оплату ·': 'To‘lov qilish ·',
+    '/мес.': '/oy',
+    'Введите сумму, например: 150000.50': 'Summani kiriting, masalan: 150000.50',
+    'Введите положительную сумму с максимум 2 знаками после точки.': 'Noldan katta summani kiriting (nuqtadan keyin ko‘pi bilan 2 raqam).',
+    'Проверьте оплату': 'To‘lovni tekshiring',
+    '✅ Подтвердить оплату': '✅ To‘lovni tasdiqlash',
+    '💳 Ещё оплата': '💳 Yana to‘lov',
+    'сохранена': 'saqlandi',
+    'Ученик #': 'O‘quvchi #',
+    'Сумма:': 'Summa:',
+    'Дата:': 'Sana:',
+    'Как пользоваться': 'Foydalanish tartibi',
+    'Оплата #': 'To‘lov #',
+    'Этот экран устарел. Выберите действие заново.': 'Bu ekran eskirgan. Amalni qaytadan tanlang.',
+    'Этот экран устарел. Начните создание заново.': 'Bu ekran eskirgan. O‘quvchi qo‘shishni qaytadan boshlang.',
+    'Новый ученик · шаг': 'Yangi o‘quvchi · bosqich',
+    'Введите имя ученика (до 150 символов).': 'O‘quvchining ismini kiriting (150 belgigacha).',
+    'Введите телефон, например +998901234567.': 'Telefon raqamini kiriting, masalan +998901234567.',
+    'Введите группу ученика (до 100 символов).': 'O‘quvchi guruhini kiriting (100 belgigacha).',
+    'Введите месячную оплату, например 500000.00. Для бесплатного обучения — 0.': 'Oylik to‘lovni kiriting, masalan 500000.00. Bepul ta’lim uchun — 0.',
+    'Предыдущее значение:': 'Oldingi qiymat:',
+    'Проверьте нового ученика': 'Yangi o‘quvchi ma’lumotlarini tekshiring',
+    'Имя:': 'Ism:',
+    'Тел.:': 'Tel.:',
+    'Месячная оплата:': 'Oylik to‘lov:',
+    '✅ Создать ученика': '✅ O‘quvchini yaratish',
+    'добавлен': 'qo‘shildi',
+    '👤 Открыть карточку': '👤 Kartani ochish',
+    '➕ Ещё ученик': '➕ Yana o‘quvchi',
+    'Введите текст от 1 до ': '1 dan ',
+    ' символов в одну строку.': ' belgigacha matnni bir qatorda kiriting.',
+    'Введите телефон цифрами, например +998901234567.': 'Telefonni raqamlar bilan kiriting, masalan +998901234567.',
+    'В телефоне должно быть от 7 до 15 цифр.': 'Telefon raqamida 7 dan 15 tagacha raqam bo‘lishi kerak.',
+    'Введите сумму от 0 с максимум 2 знаками после точки.': '0 yoki undan katta summani kiriting (nuqtadan keyin ko‘pi bilan 2 raqam).',
+    'Поиск ученика': 'O‘quvchini qidirish',
+    'Введите имя, часть имени или телефон.': 'Ismni, ismning bir qismini yoki telefon raqamini kiriting.',
+    'Поиск:': 'Qidiruv:',
+    'По запросу «': '«',
+    '» никого не найдено.': '» bo‘yicha hech kim topilmadi.',
+    'История оплат ·': 'To‘lovlar tarixi ·',
+    'Оплат пока нет.': 'Hozircha to‘lovlar yo‘q.',
+    'На этой странице оплат нет.': 'Bu sahifada to‘lovlar yo‘q.',
+    'Как пользоваться': 'Foydalanish tartibi',
+    'Для работы с оплатами откройте личный чат с ботом.': 'To‘lovlar bilan ishlash uchun bot bilan shaxsiy chatni oching.',
+    'Ваш Telegram ID:': 'Telegram ID raqamingiz:',
+    'Формат: /pay <id ученика> <сумма>. Или нажмите «Внести оплату» в меню.': 'Format: /pay <o‘quvchi IDsi> <summa>. Yoki menyuda «To‘lov qilish»ni bosing.',
+    'API-ключ бота настроен неверно.': 'Bot API kaliti noto‘g‘ri sozlangan.',
+    'Ученик не найден. Выберите ученика заново.': 'O‘quvchi topilmadi. Qaytadan tanlang.',
+    'Проверьте сумму оплаты.': 'To‘lov summasini tekshiring.',
+    'Конфликт данных. Проверьте оплаты через API.': 'Ma’lumotlar ziddiyati. To‘lovlarni API orqali tekshiring.',
+    'API отклонил запрос.': 'API so‘rovni rad etdi.',
+    'Выберите кнопку или введите сумму': 'Tugmani tanlang yoki summani kiriting',
+}
+
+
+def localize_screen(screen, language):
+    if language != 'uz' or screen is None:
+        return screen
+    for source, target in sorted(UZ_TRANSLATIONS.items(), key=lambda pair: len(pair[0]), reverse=True):
+        screen.text = screen.text.replace(source, target)
+        for row in screen.buttons:
+            for item in row:
+                item['text'] = item['text'].replace(source, target)
+    screen.placeholder = 'Tugmani tanlang yoki summani kiriting'
+    return screen
 
 
 def amount_screen(state, error=''):
@@ -274,23 +379,39 @@ def keyboard_actions(screen):
     return {b['text']: b['callback_data'] for row in screen.buttons for b in row}
 
 
-async def process_update(update, api, admins, timezone, bot_id, sessions=None, keyboards=None):
+async def process_update(update, api, admins, timezone, bot_id, sessions=None, keyboards=None, languages=None):
     if sessions is None:
         sessions = {}
     if keyboards is None:
         keyboards = {}
+    if languages is None:
+        languages = {}
     message = update.get('message', {})
     callback = update.get('callback_query', {})
     user_id = (callback or message).get('from', {}).get('id')
     text = message.get('text', '')
-    actions = {**keyboard_actions(home()), '🏠 Главное меню': 'menu',
+    language = languages.get(user_id, 'ru')
+    actions = {**keyboard_actions(localize_screen(home(), language)),
                **keyboards.get(user_id, {})}
     action = actions.get(text)
     if action is not None and not callback:
         # Reuse the button dispatcher; actor/private-chat checks remain in one place.
         update = {**update, 'callback_query': {'from': message.get('from', {}),
                                               'message': message, 'data': action}}
-    screen = await _process_update(update, api, admins, timezone, bot_id, sessions)
+    data = (update.get('callback_query') or {}).get('data', '')
+    if data == 'language':
+        screen = Screen('Выберите язык / Tilni tanlang', [
+            [button('🇷🇺 Русский', 'lang:ru')],
+            [button('🇺🇿 O‘zbekcha', 'lang:uz')],
+            back(),
+        ])
+    elif data in ('lang:ru', 'lang:uz'):
+        languages[user_id] = data.split(':')[1]
+        language = languages[user_id]
+        screen = home()
+    else:
+        screen = await _process_update(update, api, admins, timezone, bot_id, sessions)
+    screen = localize_screen(screen, language)
     if screen is not None:
         keyboards[user_id] = keyboard_actions(screen)
     return screen
@@ -332,6 +453,7 @@ async def run():
     ZoneInfo(settings.timezone)
     sessions = {}
     keyboards = {}
+    languages = {}
     async with (httpx.AsyncClient(base_url=f'https://api.telegram.org/bot{settings.bot_token}/', timeout=45) as telegram,
                 httpx.AsyncClient(base_url=settings.api_base_url, headers={'X-API-Key': settings.api_key}, timeout=15) as api):
         identity = await telegram.get('getMe')
@@ -353,7 +475,8 @@ async def run():
                     if update.get('callback_query'):
                         await acknowledge_callback(telegram, update['callback_query'])
                     try:
-                        screen = await process_update(update, api, admins, settings.timezone, bot_id, sessions, keyboards)
+                        screen = await process_update(update, api, admins, settings.timezone, bot_id,
+                                                      sessions, keyboards, languages)
                     except httpx.HTTPStatusError as exc:
                         if exc.response.status_code >= 500:
                             raise
@@ -362,7 +485,8 @@ async def run():
                                    422: 'Проверьте сумму оплаты.',
                                    409: 'Конфликт данных. Проверьте оплаты через API.'}.get(
                                        exc.response.status_code, 'API отклонил запрос.')
-                        screen = Screen(message, [back()])
+                        user_id = (update.get('callback_query') or update.get('message', {})).get('from', {}).get('id')
+                        screen = localize_screen(Screen(message, [back()]), languages.get(user_id, 'ru'))
                     if screen:
                         actor = update.get('callback_query') or update.get('message', {})
                         keyboards[actor.get('from', {}).get('id')] = keyboard_actions(screen)
