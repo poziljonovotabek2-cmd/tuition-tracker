@@ -15,10 +15,13 @@ def invoke(data, handler):
     return asyncio.run(run())
 
 
-def test_access_and_group_privacy():
+def test_public_private_access_and_group_privacy():
     def no_request(request):
-        raise AssertionError('Unauthorized request reached API')
-    assert 'Доступ закрыт' in invoke(update('/debt', uid=8), no_request)
+        raise AssertionError('Unexpected API request')
+    def public_debtors(request):
+        assert request.url.path == '/debtors'
+        return httpx.Response(200, json=[])
+    assert 'должников нет' in invoke(update('/debt', uid=8), public_debtors)
     assert '8' in invoke(update('/id', uid=8), no_request)
     assert 'личный чат' in invoke(update('/debt', kind='group'), no_request)
 
