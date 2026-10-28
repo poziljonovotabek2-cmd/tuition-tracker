@@ -26,6 +26,29 @@ def test_public_private_access_and_group_privacy():
     assert 'личный чат' in invoke(update('/debt', kind='group'), no_request)
 
 
+def test_user_can_switch_between_russian_and_uzbek():
+    async def run():
+        async with httpx.AsyncClient(base_url='http://test', transport=httpx.MockTransport(
+                lambda request: httpx.Response(200, json=[]))) as api:
+            sessions, keyboards, languages = {}, {}, {}
+            async def send(text):
+                return await process_update(update(text, uid=8), api, {7}, 'Asia/Tashkent', 123,
+                                            sessions, keyboards, languages)
+            assert 'Главное меню' in (await send('/start')).text
+            choice = await send('🌐 Язык / Til')
+            assert 'Tilni tanlang' in choice.text
+            uzbek = await send('🇺🇿 O‘zbekcha')
+            assert 'Asosiy menyu' in uzbek.text
+            assert any('O‘quvchilar' in b['text'] for row in uzbek.buttons for b in row)
+            debt = await send('/debt')
+            assert 'qarzdorlar yo‘q' in debt.text
+            russian = await send('🌐 Til / Язык')
+            assert 'язык' in russian.text.lower()
+            russian = await send('🇷🇺 Русский')
+            assert 'Главное меню' in russian.text
+    asyncio.run(run())
+
+
 def test_payment_and_idempotency_header():
     def handler(request):
         assert request.url.path == '/payments'
